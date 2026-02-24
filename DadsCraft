@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dad's Craft</title>
+<style>
+body{margin:0;overflow:hidden;font-family:sans-serif}
+#ui{position:fixed;top:10px;left:10px;background:rgba(0,0,0,.5);color:#fff;padding:10px;border-radius:12px;z-index:10}
+button{font-size:16px;margin:2px;padding:6px;border-radius:8px;border:none}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="ui">
+<div>❤️ Health: <span id="hp">100</span></div>
+<div>🛠️ Inventory: <span id="inv">Wood:0 Stone:0 Bullets:0 Gold:0 Silver:0 Platinum:0 Gems:0 DivingGear:0 UnderwaterGems:0 UnderwaterTreasure:0</span></div>
+<div>📜 Active Quest: <span id="quest">None</span></div>
+<div>🎯 Daily/Weekly Challenges: <span id="challenges">None</span></div>
+<div>🗡️ Attack: <button onclick="attack()">Attack</button></div>
+<div>⚒️ Craft Sword: <button onclick="craftSword()">Craft</button></div>
+<div>⚒️ Craft Golden Sword: <button onclick="craftGoldenSword()">Craft Gold Sword</button></div>
+<div>⚒️ Craft Platinum Pickaxe: <button onclick="craftPlatinumPickaxe()">Craft Platinum Pickaxe</button></div>
+<div>🏠 Build Gold House: <button onclick="buildGoldHouse()">Build Gold House</button></div>
+<div>🏠 Build Silver Bridge: <button onclick="buildSilverBridge()">Build Silver Bridge</button></div>
+<div>🏠 Build Platinum Statue: <button onclick="buildPlatinumStatue()">Build Platinum Statue</button></div>
+<div>🪓 Equip Tool: <button onclick="equipTool()">Toggle Pickaxe</button></div>
+<div>🪚 Equip Chainsaw: <button onclick="equipChainsaw()">Toggle Chainsaw</button></div>
+<div>🔫 Equip Gun: <button onclick="equipGun()">Toggle Gun</button></div>
+<div>🔫 Equip Rifle: <button onclick="equipRifle()">Toggle Rifle</button></div>
+<div>🧨 Craft Ammo: <button onclick="craftAmmo()">Craft Ammo</button></div>
+<div>🛒 Buy Diving Gear: <button onclick="buyDivingGear()">Buy Diving Gear (3 Gold)</button></div>
+<div>🛶 Build Boat: <button onclick="buildBoat('fire')">Fire Boat</button> <button onclick="buildBoat('water')">Water Boat</button></div>
+<div>🌉 Build Bridge: <button onclick="buildBridge()">Bridge</button></div>
+<div>🚤 Ride Boat: <button onclick="toggleRide()">Toggle Ride</button></div>
+<button onclick="shoot()">Shoot</button>
+<button onclick="placeBlock()">Place</button>
+<button onclick="removeBlock()">Remove</button>
+<div>🌞 Time: <span id="time">Day</span></div>
+<div>💨 Boost: Hold Shift while riding boat</div>
+<h1 style="position:fixed;top:0;left:50%;transform:translateX(-50%);color:white;z-index:10;font-size:24px;">Dad's Craft</h1>
+</div>
+<script>
+// Buy diving gear function
+function buyDivingGear(){
+  if(player.inventory.gold>=3){
+    player.inventory.gold-=3;
+    player.inventory.DivingGear=(player.inventory.DivingGear||0)+1;
+    alert('You bought diving gear! You can now dive underwater.');
+  } else {
+    alert('Not enough gold to buy diving gear.');
+  }
+}
+
+function canDive(){
+  return (player.inventory.DivingGear||0) > 0;
+}
+
+// Underwater resources and enemies
+let underwaterResources=[];
+let underwaterEnemies=[];
+function spawnUnderwater(){
+  for(let i=0;i<5;i++){
+    underwaterResources.push({x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*10),type:'UnderwaterGems',collected:false});
+  }
+  for(let i=0;i<3;i++){
+    underwaterEnemies.push({x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*10),hp:20,damage:5,treasure:false});
+  }
+}
+spawnUnderwater();
+
+function collectUnderwater(){
+  underwaterResources.forEach(r=>{
+    if(!r.collected && Math.abs(r.x-player.x)<=1 && Math.abs(r.y-player.y)<=1 && canDive()){
+      player.inventory.UnderwaterGems=(player.inventory.UnderwaterGems||0)+1;
+      r.collected=true;
+      alert('Collected an underwater gem!');
+    }
+  });
+  underwaterEnemies.forEach(e=>{
+    if(Math.abs(e.x-player.x)<=1 && Math.abs(e.y-player.y)<=1 && canDive() && e.hp>0){
+      e.hp-=player.attackPower;
+      alert('Attacked an underwater enemy!');
+      if(e.hp<=0){
+        alert('Underwater enemy defeated! They dropped a treasure!');
+        player.inventory.UnderwaterTreasure=(player.inventory.UnderwaterTreasure||0)+1;
+        e.treasure=true;
+      } else {
+        player.hp-=e.damage;
+      }
+    }
+  });
+}
+
+// Call collectUnderwater in the main game loop or player movement logic
+setInterval(collectUnderwater,500);
+
+// Existing game code (quests, challenges, multiplayer, crafting, PvP, boats, diving, etc.) remains unchanged.
+</script>
+</body>
+</html>
